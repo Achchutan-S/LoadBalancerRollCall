@@ -7,9 +7,7 @@ const axios = require("axios");
 const mongoose = require("mongoose");
 const Register = require("./models/registers");
 const httpProxy = require("http-proxy");
-//const dburi ="mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.6.0";
-//const dburi = "mongodb://127.0.0.1:27017/rollcallRegistration"; //DB reference
-// const dburi = "mongodb+srv://achchutan:vangomongo123@cluster0.5kalhjd.mongodb.net/?retryWrites=true&w=majority";
+
 require('dotenv').config();
 
 
