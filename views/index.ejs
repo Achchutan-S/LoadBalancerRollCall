@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- CSS only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
+  <title>Roll-call@port</title>
+  <!-- angOpen Percent number Percent angClose add this to get the port number -->
+</head>
+<style>
+  .newmain {
+    background-color: dodgerblue;
+    height: 100vh;
+    background-image: url("https://images.pexels.com/photos/2501965/pexels-photo-2501965.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
+    background-size: 760px;
+
+
+  }
+
+  .logo {
+    width: 35%;
+    display: block;
+
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .clock {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-top: 20px;
+    font-size: 50px;
+    font-family: 'Share Tech', sans-serif;
+    color: #453C67;
+
+  }
+
+  .main {
+    display: block;
+    margin-top: 3rem;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 15px;
+    width: 50%;
+    border: 3px solid darkblue;
+    padding: 10px;
+    background-color: white;
+    font-family: 'Ubuntu', sans-serif;
+  }
+
+  .header {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .forms {
+    margin-left: 30px;
+    margin-top: 1rem;
+  }
+
+  .submitbuttons {
+    margin-top: 2rem;
+    text-align: center;
+    justify-content: center;
+  }
+
+
+  input[type="radio"] {
+    display: inline-block;
+  }
+
+  @media (max-width: 767px) {
+    .main {
+      width: 90%;
+    }
+  }
+
+  .header {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .forms {
+    margin-left: 30px;
+    margin-top: 1rem;
+  }
+
+  .submitbuttons {
+    margin-top: 2rem;
+    text-align: center;
+    justify-content: center;
+  }
+
+  input[type="radio"] {
+    display: inline-block;
+  }
+
+</style>
+
+<body>
+  <div class="newmain">
+    <div class="logo-container">
+      <img class="logo" src="https://www.sastra.edu/cbcs/cbcs_tm2020/images/sastralogo.png" alt="SASTRA LOGO" />
+    </div>
+
+
+    <h2 id="current-time" class="clock">Time: 12:00:00</h2>
+
+
+    <div class="main">
+      <div class="register">
+        <div class="header">
+          <h2>SASTRA Student Home-Roll call attendance</h2>
+        </div>
+        <div class="forms">
+          <form action="" id="register" method="post">
+            <label for="rno">Registration number: </label>
+
+            <input type="text" name="rno" id="regnum" size="50rem" minlength="9" maxlength="9"
+              placeholder="Enter your Registration number" />
+            <br /><br />
+            <label for="gender" style="margin: auto 100px auto auto">Gender</label>
+            <input type="radio" name="gender" id="male" value="male" /> Male
+            <input type="radio" name="gender" id="female" value="female" />
+            Female <br /><br />
+            <label for="hostels" style="margin: auto 50px auto auto">Select hostel:</label>
+
+            <select name="hostels" id="hostel">
+              <option value="bvn1">Vinaya1</option>
+              <option value="bvn2">Vinaya2</option>
+              <option value="bvn3">Vinaya3</option>
+              <option value="bkd1">Kamadhenu</option>
+              <option value="bvsht">Vashishta</option>
+              <option disabled="true" value="bav">Ananda Vihar</option>
+              <option disabled="true" value="bkd2">Kamadhenu Annex</option>
+              <option disabled="true" value="bpv">Paramananda Vihar</option>
+              <option disabled="true" value="brlv">Rajalakshmi Vihar</option>
+
+              <option value="gsn1">Sadananda New</option>
+              <option value="gsn2">Sadananda Old</option>
+              <option value="gsn3">Sadananda Annex</option>
+              <option value="gar">Arundhati</option>
+              <option value="gan">Anasuya</option>
+              <option value="gah">Ahalya</option>
+              <option value="gsps">Sandipani Sadan</option>
+            </select>
+            <div class="submitbuttons text-center">
+              <input type="submit" onclick="showAlert()" class="btn btn-primary button" value="Submit" />
+              <input type="reset" class="btn btn-secondary" value="Reset" />
+            </div>
+          </form>
+        </div>
+      </div>
+      <!--end of register-->
+      <br />
+    </div>
+    <!--end of main-->
+  </div>
+</body>
+<script>
+  function showAlert() {
+    let a = document.getElementById("regnum").value;
+    let c = parseInt(a);
+    let b =
+      document.getElementById("male").checked ||
+      document.getElementById("female").checked;
+    if (a == "") {
+      alert("Enter your registration number");
+    } else if (!b) {
+      alert("Select gender");
+    } else {
+      alert("Attendance successfully registered ");
+    }
+  }
+
+  function formatTime(timeString) {
+    const [hourString, minute] = timeString.split(":");
+    const hour = +hourString % 24;
+    return (hour % 12 || 12) + ":" + minute + (hour < 12 ? "AM" : "PM");
+  }
+  let time = document.getElementById("current-time");
+
+  setInterval(() => {
+    let d = new Date();
+    time.innerHTML = "Time: " + formatTime(d.toLocaleTimeString());
+  }, 1000);
+</script>
+
+</html>
