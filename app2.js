@@ -41,19 +41,19 @@ app.get("/", function (req, res) {
 });
 
 app.post("/", async (req, res) => {
-    // console.log("Reached post");
+    
     console.log("request from port" + req.socket.localPort);
     try {
-        // console.log("inside try");
+        
         console.log(req.body.rno);
-        // res.send(req.body.rno);
+     
         const registerStudent = new Register({
             rno: req.body.rno,
             gender: req.body.gender,
             hostels: req.body.hostels,
         });
         const registered = await registerStudent.save();
-        // res.send(registerStudent.rno);
+        
         res.status(201).render("index");
     } catch (err) {
         console.log("error occured");
@@ -96,9 +96,6 @@ for (let j = 0; j < n; j++) {
             console.log("Mongodb connection error: " + error);
         });
 
-    // . new 1
-    //mongoose.createConnection(dburi, { useNewUrlParser: true, useUnifiedTopology: true })//.then((result) => apps[j].listen(ports[j])).catch((err) => console.log(err)); //connectiong to DATABASE
-    // request handlers for all resource servers
 
     //rendering index
     apps[j].get("/", function (req, res) {
@@ -108,11 +105,11 @@ for (let j = 0; j < n; j++) {
             success = true;
         }
         console.log("request from port" + req.socket.localPort);
-        // res.render('index', { success: success, number: req.socket.localPort });
+      
         res.render("index", { success: true, number: req.socket.localPort });
         
     });
-    // . new2
+
     apps[j].get("/registers", function (req, res) {
         console.log("request from port" + req.socket.localPort);
         Register.find({ regno: req.query.rno }).then((result) => {
@@ -134,9 +131,9 @@ for (let j = 0; j < n; j++) {
         // console.log("Reached post");
         console.log("request from port" + req.socket.localPort);
         try {
-            // console.log("inside try");
+           
             console.log(req.body.rno);
-            // res.send(req.body.rno);
+           
             const registerStudent = new Register({
                 rno: req.body.rno,
                 gender: req.body.gender,
@@ -144,7 +141,7 @@ for (let j = 0; j < n; j++) {
             });
             const registered = await registerStudent.save();
             console.log("Rollcall registered successfully");
-            // res.send(registerStudent.rno);
+          
             res.status(201).render("index1");
         } catch (err) {
             console.log("error occured");
