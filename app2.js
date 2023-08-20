@@ -142,7 +142,7 @@ for (let j = 0; j < n; j++) {
             const registered = await registerStudent.save();
             console.log("Rollcall registered successfully");
           
-            res.status(201).render("index1");
+            res.status(201).render("index");
         } catch (err) {
             console.log("error occured");
             res.status(400).send(err);
