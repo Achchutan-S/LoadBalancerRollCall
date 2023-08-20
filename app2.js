@@ -62,6 +62,8 @@ app.post("/", async (req, res) => {
     });
     const registered = await registerStudent.save();
     // res.send(registerStudent.rno);
+    console.log(req.body.rno);
+    console.log("Rollcall registered successfully");
     res.status(201).render("index");
   } catch (err) {
     if (err.code === 11000) {
