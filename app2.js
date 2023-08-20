@@ -74,7 +74,9 @@ app.post("/", async (req, res) => {
     } else {
       // Handle other errors
       console.log("Error occurred:", err);
-      res.status(500).send("Internal Server Error");
+      const errorMessage = "Internal Server Error";
+
+      return res.status(500).render("index", { errorMessage });
     }
   }
 });
@@ -114,8 +116,6 @@ for (let j = 0; j < n; j++) {
     .on("error", (error) => {
       console.log("Mongodb connection error: " + error);
     });
-
-  
 
   //rendering index
   apps[j].get("/", function (req, res) {
@@ -182,7 +182,9 @@ for (let j = 0; j < n; j++) {
       } else {
         // Handle other errors
         console.log("Error occurred:", err);
-        res.status(500).send("Internal Server Error");
+        const errorMessage = "Internal Server Error";
+
+        return res.status(500).render("index", { errorMessage });
       }
     }
   });
