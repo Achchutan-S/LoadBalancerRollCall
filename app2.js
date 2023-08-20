@@ -123,7 +123,7 @@ for (let j = 0; j < n; j++) {
                 gender: gender,
                 hostels: hostel,
             });
-            console.log("request from port" + PORT);
+            console.log("request from port" +  req.socket.localPort);
         });
     });
 
