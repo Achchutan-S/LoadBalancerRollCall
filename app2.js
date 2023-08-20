@@ -60,10 +60,11 @@ app.post("/", async (req, res) => {
       gender: req.body.gender,
       hostels: req.body.hostels,
     });
-    const registered = await registerStudent.save();
-    // res.send(registerStudent.rno);
     console.log(req.body.rno);
+    
+    const registered = await registerStudent.save();
     console.log("Rollcall registered successfully");
+    
     res.status(201).render("index");
   } catch (err) {
     if (err.code === 11000) {
@@ -169,6 +170,7 @@ for (let j = 0; j < n; j++) {
         gender: req.body.gender,
         hostels: req.body.hostels,
       });
+      console.log(req.body.rno);
       const registered = await registerStudent.save();
       console.log("Rollcall registered successfully");
       // res.send(registerStudent.rno);
