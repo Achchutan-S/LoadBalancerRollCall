@@ -21,7 +21,7 @@
       href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap"
       rel="stylesheet"
     />
-    <title>Roll-call@port</title>
+    <title>Roll-call@port <%=number %></title>
     <!-- angOpen Percent number Percent angClose add this to get the port number -->
   </head>
   <style>
@@ -121,7 +121,6 @@
 
   <body>
     <div class="newmain">
-     
       <div class="logo-container">
         <img
           class="logo"
@@ -201,7 +200,6 @@
   <script>
     function showAlert() {
       let a = document.getElementById("regnum").value;
-      let c = parseInt(a);
       let b =
         document.getElementById("male").checked ||
         document.getElementById("female").checked;
@@ -210,7 +208,8 @@
       } else if (!b) {
         alert("Select gender");
       } else {
-        alert("Attendance successfully registered ");
+        alert("Attendance successfully registered");
+        window.location.reload(); // Reload the page
       }
     }
 

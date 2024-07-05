@@ -21,8 +21,8 @@
       href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap"
       rel="stylesheet"
     />
-    <title>Roll-call@port</title>
-    <!-- angOpen Percent number Percent angClose add this to get the port number -->
+    <title>Roll-call@port <%= number %></title>
+    <!-- Add the port number dynamically -->
   </head>
   <style>
     .newmain {
@@ -35,7 +35,6 @@
     .logo {
       width: 35%;
       display: block;
-
       margin-left: auto;
       margin-right: auto;
     }
@@ -121,7 +120,6 @@
 
   <body>
     <div class="newmain">
-     
       <div class="logo-container">
         <img
           class="logo"
@@ -211,21 +209,10 @@
         alert("Select gender");
       } else {
         alert("Attendance successfully registered ");
+        window.location.reload(); // Reload the page
       }
     }
 
-    /*function formatTime(timeString) {
-      const [hourString, minute] = timeString.split(":");
-      const hour = +hourString % 24;
-      return (hour % 12 || 12) + ":" + minute + (hour < 12 ? "AM" : "PM");
-    }
-    let time = document.getElementById("current-time");
-
-    setInterval(() => {
-      let d = new Date();
-      time.innerHTML = "Time: " + formatTime(d.toLocaleTimeString());
-    }, 1000);
-    */
     function formatTime(timeStamp) {
       const d = new Date(timeStamp);
       const hour = d.getHours() % 12 || 12;
