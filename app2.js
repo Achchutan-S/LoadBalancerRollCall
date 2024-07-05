@@ -1,195 +1,143 @@
-//BACK-END CODE SECTION
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
-const axios = require("axios");
-
 const mongoose = require("mongoose");
-const Register = require("./models/registers");
 const httpProxy = require("http-proxy");
-//const dburi ="mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.6.0";
+const cors = require("cors");
+const Register = require("./models/registers");
 
 require("dotenv").config();
 
-const dburi = process.env.DB_URI;
-const app = express(); //initialize load balancer
-var apiProxy = httpProxy.createProxyServer(); //creating proxy utility
+const app = express();
+const apiProxy = httpProxy.createProxyServer();
 
-var n = 3; //default number of resource servers
-var start_port = 3001; //default starting port number
-var i = 1; //initialization of round robin variable
-var apps = []; //server farm
-var ports = []; //ports listened by servers in the farm
+const PORT = 3000;
+const DB_URI = process.env.DB_URI;
+const RESOURCE_SERVER_COUNT = 3;
+const START_PORT = 3001;
 
-//Load balancer:--> 'app' is the load balancer server
-app.set("view engine", "ejs"); //setting view engine
-app.use(express.static("public")); //setting static assets
-app.use(express.urlencoded({ extended: true })); //for post requests
+let roundRobinIndex = 0;
+const resourceServers = [];
+const ports = Array.from(
+  { length: RESOURCE_SERVER_COUNT },
+  (_, i) => START_PORT + i
+);
+
+app.set("view engine", "ejs");
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors());
 
-app.get("/", function (req, res) {
-  j = i % n; //round robin redirection using round robin variable
-  if (j == 0) {
-    console.log("redirecting to Server:" + n);
-    apiProxy.web(req, res, { target: "http://localhost:" + ports[n - 1] });
-    i++;
-  } else {
-    console.log("redirecting to Server:" + j);
-    apiProxy.web(req, res, { target: "http://localhost:" + ports[j - 1] });
-    i++;
+const connectToDatabase = async () => {
+  try {
+    await mongoose.connect(DB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB connected");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
   }
+};
+
+const createResourceServer = (port) => {
+  const serverApp = express();
+
+  serverApp.set("view engine", "ejs");
+  serverApp.use(morgan("dev"));
+  serverApp.use(express.json());
+  serverApp.use(express.urlencoded({ extended: true }));
+  serverApp.use(cors());
+
+  serverApp.get("/", (req, res) => {
+    console.log("Request from port", req.socket.localPort);
+    res.render("index", { success: true, number: req.socket.localPort });
+  });
+
+  serverApp.get("/registers", async (req, res) => {
+    console.log("Request from port", req.socket.localPort);
+    const result = await Register.findOne({ regno: req.query.rno });
+    if (result) {
+      res.render("index", {
+        number: req.socket.localPort,
+        regno: result.rno,
+        gender: result.gender,
+        hostels: result.hostels,
+      });
+    }
+  });
+
+  serverApp.post("/", async (req, res) => {
+    console.log("Request from port", req.socket.localPort);
+    try {
+      const existingStudent = await Register.findOne({ rno: req.body.rno });
+      if (existingStudent) {
+        console.log("Student already registered");
+        return res.status(400).render("index", {
+          number: req.socket.localPort,
+          alertMessage:
+            "Already registered. Please use a different registration number.",
+        });
+      }
+
+      const registerStudent = new Register(req.body);
+      await registerStudent.save();
+      console.log("Rollcall registered successfully");
+      res.status(201).render("index", { number: req.socket.localPort });
+    } catch (err) {
+      console.error("Error occurred:", err);
+      res.status(500).render("index", {
+        number: req.socket.localPort,
+        errorMessage: "Internal Server Error",
+      });
+    }
+  });
+
+  serverApp.listen(port, () => {
+    console.log(`Resource server listening on port ${port}`);
+  });
+
+  resourceServers.push(serverApp);
+};
+
+const initializeResourceServers = () => {
+  ports.forEach(createResourceServer);
+};
+
+app.get("/", (req, res) => {
+  const targetPort = ports[roundRobinIndex % RESOURCE_SERVER_COUNT];
+  roundRobinIndex++;
+  console.log(`Redirecting to Server: ${targetPort}`);
+  apiProxy.web(
+    req,
+    res,
+    { target: `http://localhost:${targetPort}` },
+    (err) => {
+      console.error("Proxy error:", err);
+      res.status(500).send("Proxy error");
+    }
+  );
 });
 
 app.post("/", async (req, res) => {
-  // console.log("Reached post");
-  console.log("request from port" + req.socket.localPort);
-  try {
-    // Check if the rno is already registered
-    const existingStudent = await Register.findOne({ rno: req.body.rno });
-
-    if (existingStudent) {
-      // If already registered, render "index" page with an alert message
-      console.log("Student already registered");
-      const alertMessage =
-        "Already registered. Please use a different registration number.";
-      return res.status(400).render("index", { alertMessage: alertMessage });
+  const targetPort = ports[roundRobinIndex % RESOURCE_SERVER_COUNT];
+  roundRobinIndex++;
+  console.log(`Redirecting to Server: ${targetPort}`);
+  apiProxy.web(
+    req,
+    res,
+    { target: `http://localhost:${targetPort}` },
+    (err) => {
+      console.error("Proxy error:", err);
+      res.status(500).send("Proxy error");
     }
-
-    const registerStudent = new Register({
-      rno: req.body.rno,
-      gender: req.body.gender,
-      hostels: req.body.hostels,
-    });
-    console.log(req.body.rno);
-    
-    const registered = await registerStudent.save();
-    console.log("Rollcall registered successfully");
-    
-    res.status(201).render("index");
-  } catch (err) {
-    if (err.code === 11000) {
-      // Handle duplicate key error (already registered) with an alert
-      console.log("Student already registered");
-      const alertMessage =
-        "Already registered. Please use a different registration number.";
-      const alertScript = `<script>alert("${alertMessage}");</script>`;
-      return res.status(400).send(alertScript);
-    } else {
-      // Handle other errors
-      console.log("Error occurred:", err);
-      const errorMessage = "Internal Server Error";
-
-      return res.status(500).render("index", { errorMessage });
-    }
-  }
+  );
 });
-//The load balancer app listens on this port.
-app.listen(3000); // listen on port 3000
 
-//Code to handle of Resource servers
-for (let j = 0; j < n; j++) {
-  var x = parseInt(start_port) + parseInt(j);
-  apps.push(express());
-  ports.push(x);
-}
-console.log(ports);
-
-for (let j = 0; j < n; j++) {
-  //RESOURCE SERVERS STORED IN SERVER FARM 'apps'
-  apps[j].set("view engine", "ejs"); //setting view engine
-  apps[j].use(morgan("dev")); //setting middleware
-  apps[j].use(express.json());
-  apps[j].use(express.urlencoded({ extended: true })); //encoding url to handle post requests
-
-  // . modif 1
-  mongoose
-    .connect(dburi, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
-    .then((result) => {
-      apps[j].listen(ports[j]);
-      console.log(ports[j]);
-    })
-    .catch((err) => console.log(err)); //connecting to DATABASE
-
-  // . new 5 Database Connection Verification
-  mongoose.connection
-    .once("open", () => console.log("Mongodb connected"))
-    .on("error", (error) => {
-      console.log("Mongodb connection error: " + error);
-    });
-
-  //rendering index
-  apps[j].get("/", function (req, res) {
-    if (req.query.success == "false") {
-      success = false;
-    } else {
-      success = true;
-    }
-    console.log("request from port" + req.socket.localPort);
-    // res.render('index', { success: success, number: req.socket.localPort });
-    res.render("index", { success: true, number: req.socket.localPort });
+connectToDatabase().then(() => {
+  initializeResourceServers();
+  app.listen(PORT, () => {
+    console.log(`Load balancer listening on port ${PORT}`);
   });
-  // . new2
-  apps[j].get("/registers", function (req, res) {
-    console.log("request from port" + req.socket.localPort);
-    Register.find({ regno: req.query.rno }).then((result) => {
-      regno = result[0].rno;
-      gender = result[0].gender;
-      hostel = result[0].hostels;
-
-      res.render("index", {
-        number: req.socket.localPort,
-        regno: req.query.rno,
-        gender: gender,
-        hostels: hostel,
-      });
-      console.log("request from port" + PORT);
-    });
-  });
-
-  apps[j].post("/", async (req, res) => {
-    // console.log("Reached post");
-    console.log("request from port" + req.socket.localPort);
-    try {
-      // Check if the rno is already registered
-      const existingStudent = await Register.findOne({ rno: req.body.rno });
-
-      if (existingStudent) {
-        // If already registered, render "index" page with an alert message
-        console.log("Student already registered");
-        const alertMessage =
-          "Already registered. Please use a different registration number.";
-        return res.status(400).render("index", { alertMessage: alertMessage });
-      }
-      // If not already registered, save the new registration
-
-      const registerStudent = new Register({
-        rno: req.body.rno,
-        gender: req.body.gender,
-        hostels: req.body.hostels,
-      });
-      console.log(req.body.rno);
-      const registered = await registerStudent.save();
-      console.log("Rollcall registered successfully");
-      // res.send(registerStudent.rno);
-      res.status(201).render("index");
-    } catch (err) {
-      if (err.code === 11000) {
-        // Handle duplicate key error (already registered) with an alert
-        console.log("Student already registered");
-        const alertMessage =
-          "Already registered. Please use a different registration number.";
-        const alertScript = `<script>alert("${alertMessage}");</script>`;
-        return res.status(400).send(alertScript);
-      } else {
-        // Handle other errors
-        console.log("Error occurred:", err);
-        const errorMessage = "Internal Server Error";
-
-        return res.status(500).render("index", { errorMessage });
-      }
-    }
-  });
-}
+});
